@@ -19,8 +19,8 @@ public class EmployeeController {
 
     @PostMapping
     public ResponseEntity<String> saveEmployee(@RequestBody Employee employee) throws URISyntaxException {
-            employeeService.save(employee);
-            return ResponseEntity.created(new URI("/employee/"+employee.getId())).build();
+            Employee savedEmployee = employeeService.save(employee);
+            return ResponseEntity.created(new URI("/employee/" + savedEmployee.getId())).build();
     }
 
     @GetMapping
@@ -32,12 +32,18 @@ public class EmployeeController {
     @GetMapping("/{employeeId}")
     public ResponseEntity<Employee> getEmployee(@PathVariable Integer employeeId) {
         Employee employee = employeeService.getOne(employeeId);
+        if(employee == null) {
+            throw new EmployeeNotFoundException(employeeId);
+        }
         return ResponseEntity.ok(employee);
     }
 
-    @PutMapping("/{employeeId}")
+    @PutMapping
     public ResponseEntity<String> updateEmployee(@RequestBody Employee updatedEmployee) {
-        employeeService.update(updatedEmployee);
+        Employee employee = employeeService.update(updatedEmployee);
+        if(employee == null) {
+            throw new EmployeeNotFoundException(updatedEmployee.getId());
+        }
         return ResponseEntity.accepted().body("Successfully updated!");
     }
 
